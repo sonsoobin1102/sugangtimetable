@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대학 시간표 조합생성기</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>📅 대학 시간표 조합생성기</h1>
+                <div class="theme-switch">
+                    <label for="themeSelect">🎨 테마:</label>
+                    <select id="themeSelect">
+                        <option value="default">기본 (Blue)</option>
+                        <option value="modern">모던 (Dark)</option>
+                        <option value="beige">베이지 (Warm)</option>
+                        <option value="cyberpunk">사이버펑크 (Neon)</option>
+                    </select>
+                </div>
+            </div>
+            <p>원하는 과목과 분반을 입력하면 가능한 모든 시간표 조합을 찾아드립니다.</p>
+        </header>
+
+        <main>
+            <!-- 왼쪽 패널: 입력 및 관리 -->
+            <section class="panel left-panel">
+                <div class="card input-card">
+                    <h2>과목 추가</h2>
+                    <div class="input-group">
+                        <label for="subjectName">과목명</label>
+                        <input type="text" id="subjectName" placeholder="예: 자료구조">
+                    </div>
+
+                    
+                    <div id="sectionsContainer">
+                        <!-- 분반 입력 폼이 여기에 동적으로 추가됨 -->
+                    </div>
+                    
+                    <button id="addSectionBtn" class="btn secondary small">+ 분반 추가</button>
+                    <button id="addSubjectBtn" class="btn primary full-width">과목 등록</button>
+                </div>
+
+                <div class="list-header">
+                <h2>등록된 과목 (<span id="subjectCount">0</span>) <span id="totalCreditsDisplay" style="font-size: 0.9em; color: #666; margin-left: 10px;">0학점 / 24학점</span></h2>
+            </div>        <div id="subjectList" class="subject-list">
+                        <!-- 등록된 과목 아이템들이 여기에 표시됨 -->
+                        <div class="empty-state">등록된 과목이 없습니다.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 오른쪽 패널: 결과 및 시각화 -->
+            <section class="panel right-panel">
+                <div class="control-bar">
+                    <button id="generateBtn" class="btn success large">✨ 가능한 모든 조합 찾기</button>
+                    <div class="filters">
+                        <!-- 추후 필터 기능 추가 위치 -->
+                    </div>
+                </div>
+
+                <div id="resultSummary" class="result-summary hidden">
+                    <h3>총 <span id="combinationCount">0</span>개의 시간표 조합을 찾았습니다!</h3>
+                    <div class="pagination">
+                        <button id="prevBtn" disabled>&lt; 이전</button>
+                        <span id="pageIndicator">0 / 0</span>
+                        <button id="nextBtn" disabled>다음 &gt;</button>
+                    </div>
+                </div>
+
+                <div id="timetableGrid" class="timetable-grid">
+                    <!-- 시간표 그리드 헤더 -->
+                    <div class="grid-header"></div>
+                    <div class="grid-header">월</div>
+                    <div class="grid-header">화</div>
+                    <div class="grid-header">수</div>
+                    <div class="grid-header">목</div>
+                    <div class="grid-header">금</div>
+
+                    <!-- 시간표 그리드 바디 (09:00 ~ 22:00) -->
+                    <!-- JS로 동적 생성 예정 -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 템플릿: 분반 입력 폼 -->
+    <template id="sectionInputTemplate">
+        <div class="section-input-item">
+            <div class="section-header">
+                <span class="section-title">분반 #<span class="section-index">1</span></span>
+                <button type="button" class="btn-icon remove-section">&times;</button>
+            </div>
+            <div class="section-times">
+                <!-- 시간대 입력 행들이 여기에 추가됨 -->
+            </div>
+            <button type="button" class="btn-text add-time">+ 시간대 추가</button>
+        </div>
+    </template>
+
+    <!-- 템플릿: 시간대 입력 행 -->
+    <template id="timeRowTemplate">
+        <div class="time-row">
+            <select class="day-select">
+                <option value="월">월</option>
+                <option value="화">화</option>
+                <option value="수">수</option>
+                <option value="목">목</option>
+                <option value="금">금</option>
+            </select>
+            <select class="start-period">
+                <!-- JS로 옵션 채움 (1교시 ~ ) -->
+            </select>
+            <span>~</span>
+            <select class="end-period">
+                <!-- JS로 옵션 채움 (1교시 ~ ) -->
+            </select>
+            <button type="button" class="btn-icon remove-time">&minus;</button>
+        </div>
+    </template>
+
+    <script src="script.js"></script>
+</body>
+</html>
