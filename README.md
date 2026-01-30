@@ -1,5 +1,7 @@
 # 📅 대학 시간표 조합 생성기 (University Timetable Generator)
 
+**👉 바로 사용하기: [https://sonsoobin1102.github.io/sugangtimetable/](https://sonsoobin1102.github.io/sugangtimetable/)**
+
 원하는 과목과 분반을 입력하면, **시간 충돌 없는 가능한 모든 시간표 조합**을 자동으로 찾아 시각화해주는 웹 애플리케이션입니다.  
 수강신청 시즌, 복잡한 시간표 고민을 한 번에 해결하세요!
 
@@ -15,29 +17,31 @@
   - '교시' 단위 입력 (1교시, 2교시...)
   - 학점 자동 계산 (수업 시간에 비례)
   - 최대 24학점 제한 및 3분반 제한 기능
+  - 수업 시간 제한 (최소 1시간 ~ 최대 3시간)
 - **직관적인 시각화**: 생성된 시간표를 그리드 형태로 한눈에 확인할 수 있습니다.
 
-## 🛠 기술 스택 (Tech Stack)
+## � 사용 방법
 
-- **Frontend**: HTML5, CSS3 (CSS Variables for Theming), Vanilla JavaScript (ES6+)
-- **No Libraries**: 외부 라이브러리 없이 순수 웹 표준 기술로만 구현되었습니다.
-
-## 🚀 사용 방법
-
-1. **과목 추가**: 과목명을 입력하고 `과목 등록` 버튼을 누릅니다.
-2. **분반 설정**:
+1. **링크 접속**: 위 [바로가기 링크](https://sonsoobin1102.github.io/sugangtimetable/)를 클릭하여 접속합니다. (설치 불필요)
+2. **과목 추가**: 과목명을 입력하고 `과목 등록` 버튼을 누릅니다.
+3. **분반 설정**:
    - 각 과목마다 여러 개의 분반(옵션)을 추가할 수 있습니다.
    - 예: '자료구조' 과목에 대해 '월1-3(A분반)' 또는 '수1-3(B분반)' 중 하나를 듣고 싶다면, 분반을 2개 만들어서 입력합니다.
-3. **조합 찾기**: 모든 과목을 등록한 후 `✨ 가능한 모든 조합 찾기` 버튼을 클릭합니다.
-4. **결과 확인**: 생성된 시간표들을 `이전` / `다음` 버튼으로 넘겨가며 확인합니다.
+4. **조합 찾기**: 모든 과목을 등록한 후 `✨ 가능한 모든 조합 찾기` 버튼을 클릭합니다.
+5. **결과 확인**: 생성된 시간표들을 `이전` / `다음` 버튼으로 넘겨가며 확인합니다.
 
-## 📂 설치 및 실행
+## � 방식 (Tech Stack)
 
-이 프로젝트는 정적 웹사이트(Static Website)로, 별도의 서버 설치가 필요 없습니다.
+- **Frontend**: HTML5, CSS3 (CSS Variables for Theming), Vanilla JavaScript (ES6+)
+- **Hosting**: GitHub Pages
+
+## 📂 개발자를 위한 설치 (Local Development)
+
+이 코드를 수정하거나 로컬에서 실행해보고 싶은 개발자를 위한 안내입니다.
 
 1. 저장소를 클론합니다.
    ```bash
-   git clone https://github.com/your-username/sugang-timetable.git
+   git clone https://github.com/sonsoobin1102/sugangtimetable.git
    ```
 2. `index.html` 파일을 브라우저(Chrome, Edge 등)에서 엽니다.
 
@@ -49,8 +53,4 @@
 
 ## 🤝 기여하기 (Contributing)
 
-버그 제보나 기능 제안은 언제나 환영합니다! [Issues](https://github.com/your-username/sugang-timetable/issues)에 남겨주세요.
-
-## 📄 라이선스
-
-This project is licensed under the MIT License.
+버그 제보나 기능 제안은 언제나 환영합니다! [Issues](https://github.com/sonsoobin1102/sugangtimetable/issues)에 남겨주세요.
