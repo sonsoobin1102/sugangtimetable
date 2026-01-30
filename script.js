@@ -40,6 +40,12 @@ function initUI() {
     document.getElementById('prevBtn').addEventListener('click', () => showCombination(currentCombinationIndex - 1));
     document.getElementById('nextBtn').addEventListener('click', () => showCombination(currentCombinationIndex + 1));
     
+    // 신규 기능 이벤트 리스너
+    document.getElementById('resetBtn').addEventListener('click', resetData);
+    document.getElementById('downloadBtn').addEventListener('click', downloadTimetable);
+    
+
+    
     // 상위 요소에 이벤트 위임 (동적 생성된 요소들 처리)
     document.getElementById('sectionsContainer').addEventListener('click', (e) => {
         if (e.target.closest('.remove-section')) {
@@ -299,6 +305,9 @@ function getRandomColorIndex() {
 
 // --- 알고리즘 (백트래킹) ---
 function generateTimetable() {
+    // 그리드 초기화 (에러 메시지나 이전 상태 제거 및 기본 구조 복구)
+    renderTimetableGrid();
+
     if (subjects.length === 0) {
         showToast('과목을 먼저 등록해주세요.', 'info');
         return;
@@ -316,14 +325,132 @@ function generateTimetable() {
         showCombination(0);
         showToast(`총 ${generatedCombinations.length}개의 조합을 찾았습니다!`, 'success');
     } else {
-        showToast('가능한 시간표 조합이 없습니다. 시간 충돌을 확인해주세요.', 'error');
-        clearGridEvents();
+        showToast('가능한 시간표 조합이 없습니다. 원인을 분석합니다...', 'error');
+        analyzeConflicts();
     }
+}
+
+function analyzeConflicts() {
+    const reasons = [];
+    const isLunchGuaranteed = document.getElementById('lunchCheck').checked;
+
+    // 1. 점심시간 충돌 분석
+    if (isLunchGuaranteed) {
+        subjects.forEach(subj => {
+            // 해당 과목의 '모든' 분반이 점심시간 확보에 실패하는지 확인
+            const allSectionsFail = subj.sections.every(sec => {
+                // checkLunchBreak는 스케줄 배열을 받으므로, 임시 배열 생성
+                // sec 객체 구조: { times: [...] }
+                // checkLunchBreak가 { times: ... } 형태의 객체 배열을 기대함
+                return !checkLunchBreak([{ times: sec.times }]);
+            });
+
+            if (allSectionsFail) {
+                reasons.push(`🍱 <strong>[${subj.name}]</strong>의 모든 분반이 점심시간(11~14시 중 1시간)을 막고 있습니다.`);
+            }
+        });
+    }
+
+    // 2. 과목 간 1:1 충돌 분석
+    for (let i = 0; i < subjects.length; i++) {
+        for (let j = i + 1; j < subjects.length; j++) {
+            const subjA = subjects[i];
+            const subjB = subjects[j];
+
+            // A 과목의 모든 분반과 B 과목의 모든 분반이 서로 충돌하는지 확인
+            let allConflict = true;
+            
+            for (const secA of subjA.sections) {
+                let sectionACompatible = false; // A의 이 분반이 B의 어떤 분반과라도 호환되는가?
+                
+                for (const secB of subjB.sections) {
+                    if (!isSectionConflict(secA, secB)) {
+                        sectionACompatible = true;
+                        break; // 호환되는 것 찾음 -> 이 A 분반은 OK
+                    }
+                }
+                
+                if (!sectionACompatible) {
+                    // A의 이 분반은 B의 어떤 것과도 안됨.
+                    // 하지만 "모든 조합"이 안되는지 보려면.. 로직을 다시 생각
+                    // "A와 B가 겹칩니다"라고 하려면, A,B를 동시에 수강할 수 있는 분반 조합이 단 하나도 없어야 함.
+                    // 즉, (A의 어떤 분반, B의 어떤 분반) 쌍을 만들었을 때, 호환되는 쌍이 존재하면 충돌 아님.
+                }
+            }
+            
+            // 다시 구현: 호환되는 쌍이 하나라도 있으면 OK. 없으면 충돌.
+            let hasCompatiblePair = false;
+            for (const secA of subjA.sections) {
+                for (const secB of subjB.sections) {
+                    if (!isSectionConflict(secA, secB)) {
+                        hasCompatiblePair = true;
+                        break;
+                    }
+                }
+                if (hasCompatiblePair) break;
+            }
+
+            if (!hasCompatiblePair) {
+                 reasons.push(`<strong>[${subjA.name}]</strong>와(과) <strong>[${subjB.name}]</strong>의 시간표가 서로 겹칩니다.`);
+            }
+        }
+    }
+
+    // UI 표시
+    const grid = document.getElementById('timetableGrid');
+    grid.innerHTML = ''; // 초기화
+    
+    const reportBox = document.createElement('div');
+    reportBox.style.gridColumn = "1 / -1";
+    reportBox.style.gridRow = "1 / -1";
+    reportBox.style.padding = "30px";
+    reportBox.style.display = "flex";
+    reportBox.style.flexDirection = "column";
+    reportBox.style.justifyContent = "center";
+    reportBox.style.alignItems = "center";
+    reportBox.style.backgroundColor = "rgba(255, 255, 255, 0.9)";
+    reportBox.style.zIndex = "10";
+    reportBox.style.borderRadius = "12px";
+
+    let html = '<h3 style="color:#e74c3c; margin-bottom:20px; font-size:1.5rem;">❌ 시간표를 완성할 수 없습니다</h3>';
+    
+    if (reasons.length > 0) {
+        html += '<ul style="text-align:left; display:inline-block; font-size:1.1rem; line-height:1.8; color:#333;">';
+        // 중복 제거 (혹시 모를)
+        const uniqueReasons = [...new Set(reasons)];
+        uniqueReasons.forEach(r => html += `<li>${r}</li>`);
+        html += '</ul>';
+    } else {
+        html += '<p style="font-size:1.1rem; color:#555;">여러 과목이 복합적으로 얽혀있어 구체적인 원인을 찾기 어렵습니다.<br>과목 수를 줄이거나 조건을 완화해보세요.</p>';
+    }
+    
+    reportBox.innerHTML = html;
+    grid.appendChild(reportBox);
+}
+
+function isSectionConflict(secA, secB) {
+    for (const timeA of secA.times) {
+        for (const timeB of secB.times) {
+            if (timeA.day === timeB.day) {
+                // 시간 겹침 판별
+                if (timeA.start < timeB.end && timeB.start < timeA.end) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 
 function findCombinations(subjectIdx, currentSchedule) {
     // Base Case: 모든 과목에 대해 분반 선택 완료
     if (subjectIdx === subjects.length) {
+        // 점심 시간 보장 체크 (옵션 활성화 시)
+        // 기존엔 findCombinations 중간에서 체크했으나, '전체 스케줄'을 보고 빈 시간을 찾아야 하므로 완성된 시점에서 체크하는 것이 정확함
+        if (document.getElementById('lunchCheck').checked) {
+            if (!checkLunchBreak(currentSchedule)) return; // 조건 불만족 시 제외
+        }
+
         // 깊은 복사로 저장 (참조 끊기)
         generatedCombinations.push([...currentSchedule]);
         return;
@@ -333,6 +460,8 @@ function findCombinations(subjectIdx, currentSchedule) {
     
     // 현재 과목의 각 분반에 대해 시도
     for (const section of currentSubject.sections) {
+        // (구) 점심 공강 로직 삭제됨 -> Base Case에서 일괄 체크
+        
         if (!isConflict(section, currentSchedule)) {
             // 선택: 현재 스케줄에 추가
             currentSchedule.push({
@@ -366,6 +495,61 @@ function isConflict(newSection, currentSchedule) {
         }
     }
     return false;
+}
+
+// 11:00 ~ 14:00 사이에 최소 1시간의 공강이 있는지 확인
+function checkLunchBreak(schedule) {
+    // 요일별로 11~14시 사이의 수업 시간대를 모음
+    const dayMap = { '월': [], '화': [], '수': [], '목': [], '금': [] };
+    
+    // 스케줄 순회
+    for (const item of schedule) {
+        for (const t of item.times) {
+            // 11시 ~ 14시와 겹치는 시간대만 추출
+            // 수업 Start < 14 AND 수업 End > 11
+            if (t.start < 14 && t.end > 11) {
+                // 겹치는 구간만 잘라냄 (Clamping)
+                const overlapStart = Math.max(t.start, 11);
+                const overlapEnd = Math.min(t.end, 14);
+                
+                dayMap[t.day].push({ start: overlapStart, end: overlapEnd });
+            }
+        }
+    }
+    
+    // 각 요일별 검사
+    const days = ['월', '화', '수', '목', '금'];
+    for (const day of days) {
+        const intervals = dayMap[day];
+        
+        // 해당 요일에 점심 시간대 수업이 아예 없으면 OK (3시간 통비움)
+        if (intervals.length === 0) continue;
+        
+        // 시간순 정렬
+        intervals.sort((a, b) => a.start - b.start);
+        
+        // 빈 시간(Gap) 계산
+        // 1. 11:00 ~ 첫 수업 시작
+        if (intervals[0].start - 11 >= 1) continue; // 1시간 이상 비어있음 -> 통과
+        
+        // 2. 수업 사이사이 갭
+        let foundGap = false;
+        for (let i = 0; i < intervals.length - 1; i++) {
+            if (intervals[i+1].start - intervals[i].end >= 1) {
+                foundGap = true;
+                break;
+            }
+        }
+        if (foundGap) continue; // 통과
+        
+        // 3. 마지막 수업 종료 ~ 14:00
+        if (14 - intervals[intervals.length - 1].end >= 1) continue; // 통과
+        
+        // 위 조건을 하나도 만족 못하면, 이 요일은 밥 먹을 시간이 없음 (Fail)
+        return false;
+    }
+    
+    return true; // 모든 요일 통과
 }
 
 // --- 시각화 (그리드 렌더링) ---
@@ -504,4 +688,37 @@ function loadSubjects() {
         sectionIdCounter = maxId;
         renderSubjectList();
     }
+}
+
+function resetData() {
+    if (!confirm('모든 과목 데이터가 삭제됩니다. 계속하시겠습니까?')) return;
+    
+    subjects = [];
+    sectionIdCounter = 0;
+    generatedCombinations = [];
+    currentCombinationIndex = 0;
+    
+    localStorage.removeItem('subjects');
+    
+    renderSubjectList();
+    clearGridEvents();
+    
+    document.getElementById('resultSummary').classList.add('hidden');
+    document.getElementById('sectionsContainer').innerHTML = '';
+    addSectionInput();
+    
+    showToast('모든 데이터가 초기화되었습니다.', 'info');
+}
+
+function downloadTimetable() {
+    const grid = document.getElementById('timetableGrid');
+    
+    // 모바일 등에서 스크롤 되어있을 수 있으므로 전체를 찍기 위해 임시 스타일 적용 가능
+    html2canvas(grid, { scale: 2 }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'timetable.png';
+        link.href = canvas.toDataURL();
+        link.click();
+        showToast('시간표 이미지가 저장되었습니다! 📸', 'success');
+    });
 }

@@ -6,6 +6,7 @@
     <title>대학 시간표 조합생성기</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -44,12 +45,18 @@
                     <button id="addSubjectBtn" class="btn primary full-width">과목 등록</button>
                 </div>
 
-                <div class="list-header">
-                <h2>등록된 과목 (<span id="subjectCount">0</span>) <span id="totalCreditsDisplay" style="font-size: 0.9em; color: #666; margin-left: 10px;">0학점 / 24학점</span></h2>
-            </div>        <div id="subjectList" class="subject-list">
-                        <!-- 등록된 과목 아이템들이 여기에 표시됨 -->
-                        <div class="empty-state">등록된 과목이 없습니다.</div>
-                    </div>
+                <div class="list-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h2 style="margin: 0; font-size: 1.2rem;">등록된 과목 (<span id="subjectCount">0</span>)</h2>
+                    <button id="resetBtn" class="btn-text danger" style="font-size: 0.9rem; color: #e74c3c;">🔄 전체 초기화</button>
+                </div>
+                <!-- Total Credits moved inside or below list header? Original code had it inside h2 but the structure was a bit messy. Let's fix it -->
+                <div style="margin-bottom: 10px; font-size: 0.9em; color: #666; text-align: right;">
+                     <span id="totalCreditsDisplay">0학점 / 24학점</span>
+                </div>
+
+                <div id="subjectList" class="subject-list">
+                    <!-- 등록된 과목 아이템들이 여기에 표시됨 -->
+                    <div class="empty-state">등록된 과목이 없습니다.</div>
                 </div>
             </section>
 
@@ -57,14 +64,18 @@
             <section class="panel right-panel">
                 <div class="control-bar">
                     <button id="generateBtn" class="btn success large">✨ 가능한 모든 조합 찾기</button>
-                    <div class="filters">
-                        <!-- 추후 필터 기능 추가 위치 -->
-                    </div>
+                </div>
+                <div class="filters" style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="lunchCheck" style="width: auto; height: auto;">
+                    <label for="lunchCheck" style="cursor: pointer; user-select: none;">🍱 점심 시간 확보</label>
                 </div>
 
                 <div id="resultSummary" class="result-summary hidden">
-                    <h3>총 <span id="combinationCount">0</span>개의 시간표 조합을 찾았습니다!</h3>
-                    <div class="pagination">
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <h3>총 <span id="combinationCount">0</span>개의 조합</h3>
+                        <button id="downloadBtn" class="btn-text" style="color: var(--primary-dark);">📷 이미지 저장</button>
+                    </div>
+                    <div class="pagination" style="margin-top: 10px; text-align: center;">
                         <button id="prevBtn" disabled>&lt; 이전</button>
                         <span id="pageIndicator">0 / 0</span>
                         <button id="nextBtn" disabled>다음 &gt;</button>
