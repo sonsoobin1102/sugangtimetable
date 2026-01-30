@@ -6,7 +6,7 @@
 수강신청 시즌, 복잡한 시간표 고민을 한 번에 해결하세요!
 
 ![Project Preview](./assets/preview.png)
-*(스크린샷 이미지를 assets 폴더에 preview.png 이름으로 넣어주세요)*
+
 
 ## ✨ 주요 기능
 
