@@ -3,8 +3,8 @@
 원하는 과목과 분반을 입력하면, **시간 충돌 없는 가능한 모든 시간표 조합**을 자동으로 찾아 시각화해주는 웹 애플리케이션입니다.  
 수강신청 시즌, 복잡한 시간표 고민을 한 번에 해결하세요!
 
-![Project Preview](https://via.placeholder.com/800x400?text=Preview+Image) 
-*(스크린샷을 여기에 추가하세요)*
+![Project Preview](./assets/preview.png)
+*(스크린샷 이미지를 assets 폴더에 preview.png 이름으로 넣어주세요)*
 
 ## ✨ 주요 기능
 
