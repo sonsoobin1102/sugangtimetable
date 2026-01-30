@@ -49,8 +49,5 @@
 
 ## 🤝 기여하기 (Contributing)
 
-버그 제보나 기능 제안은 언제나 환영합니다! [Issues](https://github.com/your-username/sugang-timetable/issues)에 남겨주세요.
+버그 제보나 기능 제안은 언제나 환영합니다! [Issues](https://github.com/sonsoobin1102/sugg-timetable/issues)에 남겨주세요.
 
-## 📄 라이선스
-
-This project is licensed under the MIT License.
