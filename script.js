@@ -14,7 +14,7 @@ const END_HOUR = 17; // 17시 시작 수업이 마지막 (18시 종료)
 
 document.addEventListener('DOMContentLoaded', () => {
     initUI();
-    // loadTestData(); // 테스트 데이터 로드 (삭제됨)
+    loadSubjects(); // 저장된 데이터 로드
     renderTimetableGrid();
 });
 
@@ -23,7 +23,15 @@ function initUI() {
     // 첫 번째 과목의 첫 번째 분반 입력 폼 자동 추가는 하지 않음 (사용자가 직접 추가)
     // 하지만 편의를 위해 페이지 로드 시 빈 분반 하나는 추가해줄 수 있음. 
     // 여기서는 '분반 추가' 버튼이 있으므로 생략하거나, 첫 분반 입력을 위해 자동으로 하나 띄워줌.
+    // 첫 번째 과목의 첫 번째 분반 입력 폼 자동 추가는 하지 않음 (사용자가 직접 추가)
+    // 하지만 편의를 위해 페이지 로드 시 빈 분반 하나는 추가해줄 수 있음. 
+    // 여기서는 '분반 추가' 버튼이 있으므로 생략하거나, 첫 분반 입력을 위해 자동으로 하나 띄워줌.
     addSectionInput(); 
+
+    // Toast Container 생성
+    const toastContainer = document.createElement('div');
+    toastContainer.className = 'toast-container';
+    document.body.appendChild(toastContainer); 
 
     // 이벤트 리스너 등록
     document.getElementById('addSectionBtn').addEventListener('click', addSectionInput);
@@ -82,7 +90,7 @@ function addSectionInput() {
     
     // 분반 최대 3개 제한
     if (container.querySelectorAll('.section-input-item').length >= 3) {
-        alert('분반은 최대 3개까지만 추가할 수 있습니다.');
+        showToast('분반은 최대 3개까지만 추가할 수 있습니다.', 'info');
         return;
     }
 
@@ -127,7 +135,7 @@ function addSubject() {
     const name = nameInput.value.trim();
 
     if (!name) {
-        alert('과목명을 입력해주세요.');
+        showToast('과목명을 입력해주세요.', 'error');
         return;
     }
     
@@ -135,7 +143,7 @@ function addSubject() {
 
     const sectionInputs = document.querySelectorAll('.section-input-item');
     if (sectionInputs.length === 0) {
-        alert('최소 하나의 분반을 등록해야 합니다.');
+        showToast('최소 하나의 분반을 등록해야 합니다.', 'error');
         return;
     }
 
@@ -173,7 +181,7 @@ function addSubject() {
         });
 
         if (timeSlots.length === 0) {
-            alert(`분반 #${i+1}에 유효한 시간대가 없습니다.`);
+            showToast(`분반 #${i+1}에 유효한 시간대가 없습니다.`, 'error');
             return;
         }
 
@@ -194,14 +202,14 @@ function addSubject() {
 
     // 학점(시간) 제한 검사: 최소 1학점 ~ 최대 3학점
     if (calculatedCredit < 1 || calculatedCredit > 3) {
-        alert(`수업 시간은 총 1시간(1학점) 이상, 3시간(3학점) 이하여야 합니다.\n(현재 입력: ${calculatedCredit}시간)`);
+        showToast(`수업 시간은 총 1시간(1학점) 이상, 3시간(3학점) 이하여야 합니다.\n(현재 입력: ${calculatedCredit}시간)`, 'error');
         return;
     }
 
     // 학점 제한 검사 (최대 24학점)
     const currentTotalCredits = subjects.reduce((sum, subj) => sum + subj.credit, 0);
     if (currentTotalCredits + calculatedCredit > 24) {
-        alert(`최대 24학점까지만 담을 수 있습니다.\n(현재: ${currentTotalCredits}학점 / 추가 시: ${currentTotalCredits + calculatedCredit}학점)`);
+        showToast(`최대 24학점까지만 담을 수 있습니다.\n(현재: ${currentTotalCredits}학점 / 추가 시: ${currentTotalCredits + calculatedCredit}학점)`, 'error');
         return;
     }
 
@@ -213,6 +221,9 @@ function addSubject() {
         colorIndex: getRandomColorIndex() // Hex 대신 인덱스 저장
     });
 
+    saveSubjects(); // 데이터 저장
+    showToast(`${name} 과목이 등록되었습니다.`, 'success');
+
     // 입력 폼 초기화
     nameInput.value = '';
     document.getElementById('sectionsContainer').innerHTML = '';
@@ -223,6 +234,8 @@ function addSubject() {
 
 function removeSubject(index) {
     subjects.splice(index, 1);
+    saveSubjects(); // 데이터 저장
+    showToast('과목이 삭제되었습니다.', 'info');
     renderSubjectList();
 }
 
@@ -287,7 +300,7 @@ function getRandomColorIndex() {
 // --- 알고리즘 (백트래킹) ---
 function generateTimetable() {
     if (subjects.length === 0) {
-        alert('과목을 먼저 등록해주세요.');
+        showToast('과목을 먼저 등록해주세요.', 'info');
         return;
     }
 
@@ -301,8 +314,9 @@ function generateTimetable() {
     if (generatedCombinations.length > 0) {
         currentCombinationIndex = 0;
         showCombination(0);
+        showToast(`총 ${generatedCombinations.length}개의 조합을 찾았습니다!`, 'success');
     } else {
-        alert('가능한 시간표 조합이 없습니다. 시간 충돌을 확인해주세요.');
+        showToast('가능한 시간표 조합이 없습니다. 시간 충돌을 확인해주세요.', 'error');
         clearGridEvents();
     }
 }
@@ -451,4 +465,43 @@ function showCombination(index) {
 function clearGridEvents() {
     const blocks = document.querySelectorAll('.class-block');
     blocks.forEach(b => b.remove());
+}
+
+// --- Toast & Storage ---
+function showToast(message, type = 'info') {
+    const container = document.querySelector('.toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    
+    container.appendChild(toast);
+    
+    // Animation
+    setTimeout(() => toast.classList.add('show'), 10);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+function saveSubjects() {
+    localStorage.setItem('subjects', JSON.stringify(subjects));
+}
+
+function loadSubjects() {
+    const data = localStorage.getItem('subjects');
+    if (data) {
+        subjects = JSON.parse(data);
+        // sectionIdCounter 복구 (최댓값 찾기)
+        let maxId = 0;
+        subjects.forEach(subj => {
+            subj.sections.forEach(sec => {
+                if (sec.id > maxId) maxId = sec.id;
+            });
+        });
+        sectionIdCounter = maxId;
+        renderSubjectList();
+    }
 }

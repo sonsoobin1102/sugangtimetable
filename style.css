@@ -402,10 +402,47 @@ input[type="text"], select {
     font-size: 0.8rem;
 }
 
+/* Toast Notification */
+.toast-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1000;
+}
+
+.toast {
+    min-width: 250px;
+    padding: 12px 20px;
+    border-radius: 25px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast.success { background: #2ecc71; }
+.toast.error { background: #e74c3c; }
+.toast.info { background: #3498db; }
+
 /* Responsive & Mobile Adaptation */
 @media (max-width: 768px) {
     .container {
-        padding: 5px;
+        padding: 10px;
     }
 
     main {
@@ -421,7 +458,7 @@ input[type="text"], select {
     .header-content {
         flex-direction: column;
         text-align: center;
-        gap: 15px;
+        gap: 10px;
     }
     
     .theme-switch {
@@ -436,12 +473,17 @@ input[type="text"], select {
     }
 
     .timetable-grid {
-        min-width: 500px; /* Ensure grid doesn't squash too much */
+        min-width: 600px; /* Ensure grid is readable */
+        font-size: 0.85rem;
+    }
+    
+    .grid-header, .grid-cell {
+        padding: 2px;
     }
 
     /* Inputs & Buttons Touch-Friendly */
     input, select, button {
-        min-height: 44px; /* Apple Human Interface Guidelines */
+        min-height: 48px; /* Touch target size */
     }
     
     .btn {
@@ -449,6 +491,6 @@ input[type="text"], select {
     }
 
     /* Adjust font sizes */
-    h1 { font-size: 1.4rem; }
+    h1 { font-size: 1.5rem; }
     h2 { font-size: 1.2rem; }
 }
